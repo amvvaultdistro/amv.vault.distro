@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Portal | AMV Vault</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_Z29vZC1naXJhZmZlLTc5LmNsZXJrLmFjY291bnRzLmRldiQ" src="https://good-giraffe-79.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+
+    <style>
+        :root { --gold: #D4AF37; --dark: #000000; --card-bg: #0a0a0a; }
+        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        .wrapper { display: flex; }
+        .sidebar { min-width: 260px; background: var(--dark); min-height: 100vh; border-right: 1px solid #222; position: fixed; padding: 30px 20px; z-index: 100; }
+        .content { margin-left: 260px; width: 100%; padding: 50px; transition: 0.3s; }
+        
+        .nav-link { color: #888; padding: 15px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; text-decoration: none; display: block; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background: #111; color: var(--gold); }
+        .portal-card { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; padding: 25px; margin-bottom: 30px; }
+        .gold-text { color: var(--gold); font-weight: 800; }
+        .form-control { background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
+        .form-control:focus { background: #151515; color: #fff; border-color: var(--gold); box-shadow: none; }
+        
+        .upload-box { border: 2px dashed #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { border-color: var(--gold); background: #050505; }
+        
+        .btn-gold { background: var(--gold); color: #000; font-weight: 900; border: none; padding: 15px; border-radius: 8px; width: 100%; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .progress { height: 12px; background: #111; border-radius: 10px; display: none; margin-top: 20px; overflow: hidden; }
+        .progress-bar { background: var(--gold); transition: 0.4s; }
+
+        .tab-section { display: none; }
+        .tab-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="wrapper" id="main-wrapper" style="display: none;">
+    <nav class="sidebar">
+        <h3 class="gold-text mb-5 text-center" style="letter-spacing: 2px;">AMV VAULT</h3>
+        <a class="nav-link active" onclick="switchTab(event, 'dash-tab')"><i class="fa fa-th-large"></i> Dashboard</a>
+        <a class="nav-link" onclick="switchTab(event, 'upload-tab')"><i class="fa fa-cloud-upload"></i> Distribute Audio</a>
+        <a class="nav-link" onclick="switchTab(event, 'wallet-tab')"><i class="fa fa-bank"></i> Payouts</a>
+        <hr style="border-color: #222;">
+        <a href="#" id="logout-link" class="nav-link text-danger"><i class="fa fa-sign-out"></i> Logout</a>
+    </nav>
+
+    <div class="content">
+        <div id="dash-tab" class="tab-section active">
+            <h1 class="fw-900">Molo, <span class="gold-text" id="artist-display">Artist</span></h1>
+            <p class="text-muted">Welcome to your AMV Vault Portal.</p>
+            <div class="row mt-4">
+                <div class="col-md-4"><div class="portal-card"><h6>Revenue</h6><h2 class="gold-text">R 0.00</h2></div></div>
+                <div class="col-md-4"><div class="portal-card"><h6>Total Streams</h6><h2 class="gold-text">0</h2></div></div>
+                <div class="col-md-4"><div class="portal-card"><h6>Releases</h6><h2 class="gold-text">0</h2></div></div>
+            </div>
+        </div>
+
+        <div id="upload-tab" class="tab-section">
+            <h1 class="fw-900 mb-4">New <span class="gold-text">Release</span></h1>
+            <form id="submissionForm">
+                <div class="portal-card">
+                    <h5 class="gold-text mb-3">Title Details</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="small fw-bold text-muted">ARTIST NAME</label>
+                            <input type="text" id="artistName" class="form-control" placeholder="e.g. MFR Souls" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="small fw-bold text-muted">SONG TITLE</label>
+                            <input type="text" id="songTitle" class="form-control" placeholder="e.g. Amanikiniki" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="small fw-bold text-muted">GENRE</label>
+                            <select id="songGenre" class="form-control">
+                                <option>Amapiano</option>
+                                <option>Afro House</option>
+                                <option>Hip Hop</option>
+                                <option>Afro Pop</option>
+                                <option>Gqom</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="upload-box" onclick="document.getElementById('audioInput').click()">
+                                <i class="fa fa-file-audio-o fa-2x gold-text mb-2"></i><br>
+                                <span id="audioName" class="small">Upload Master WAV</span>
+                                <input type="file" id="audioInput" hidden accept=".wav" onchange="previewFile('audioInput', 'audioName')">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="upload-box" onclick="document.getElementById('coverInput').click()">
+                                <i class="fa fa-image fa-2x gold-text mb-2"></i><br>
+                                <span id="coverName" class="small">Artwork (3000px JPG/PNG)</span>
+                                <input type="file" id="coverInput" hidden accept="image/*" onchange="previewFile('coverInput', 'coverName')">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="portal-card">
+                    <h5 class="gold-text mb-3">Royalty Split Sheet</h5>
+                    <div id="split-rows">
+                        <div class="row g-2 mb-2 split-item">
+                            <div class="col-7"><input type="text" class="form-control c-name" placeholder="Name" required></div>
+                            <div class="col-3"><input type="number" class="form-control c-share" placeholder="%" required></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-warning mt-2" onclick="addRow()">+ Add Contributor</button>
+                </div>
+
+                <div class="progress" id="progCont">
+                    <div id="progBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                </div>
+                <p id="statusTxt" class="text-center mt-2 small"></p>
+                <button type="submit" id="submitBtn" class="btn-gold mt-3">Push to Stores</button>
+            </form>
+        </div>
+
+        <div id="wallet-tab" class="tab-section">
+            <h1 class="fw-900">Financial <span class="gold-text">Vault</span></h1>
+            <div class="portal-card text-center py-5">
+                <i class="fa fa-lock fa-3x mb-3 text-muted"></i>
+                <h5>Current Balance: <span class="gold-text">R 0.00</span></h5>
+                <button class="btn btn-outline-secondary mt-3" disabled>Minimum Payout: R 500.00</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // INITIALIZE SUPABASE
+    const SB_URL = 'https://evfywprduobqiwruvxfr.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2Znl3cHJkdW9icWl3cnV2eGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzI0NjYsImV4cCI6MjA4ODQ0ODQ2Nn0.IiVO1pZsYcy7--JiqCV0WKIKyH3-BGwBcvbJa5P589k'; 
+    const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+    // CLERK AUTH LOAD
+    window.addEventListener('load', async () => {
+        await Clerk.load();
+        
+        if (!Clerk.user) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        const displayName = Clerk.user.firstName || Clerk.user.primaryEmailAddress.emailAddress.split('@')[0];
+        document.getElementById('artist-display').innerText = displayName;
+        
+        // Populate the Artist Name field by default with their Clerk name
+        document.getElementById('artistName').value = displayName;
+        
+        document.getElementById('main-wrapper').style.display = 'flex';
+    });
+
+    // NAVIGATION
+    function switchTab(e, tabId) {
+        document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        e.currentTarget.classList.add('active');
+    }
+
+    function previewFile(inputId, displayId) {
+        const file = document.getElementById(inputId).files[0];
+        if (file) {
+            document.getElementById(displayId).innerText = file.name;
+            document.getElementById(displayId).classList.add('gold-text');
+        }
+    }
+
+    function addRow() {
+        const container = document.getElementById('split-rows');
+        const div = document.createElement('div');
+        div.className = 'row g-2 mb-2 split-item';
+        div.innerHTML = `
+            <div class="col-7"><input type="text" class="form-control c-name" placeholder="Name" required></div>
+            <div class="col-3"><input type="number" class="form-control c-share" placeholder="%" required></div>
+            <div class="col-2"><button type="button" class="btn btn-dark w-100" onclick="this.parentElement.parentElement.remove()">×</button></div>
+        `;
+        container.appendChild(div);
+    }
+
+    document.getElementById('logout-link').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await Clerk.signOut();
+        window.location.href = "index.html";
+    });
+
+    // SUBMISSION LOGIC
+    document.getElementById('submissionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const status = document.getElementById('statusTxt');
+        const progBar = document.getElementById('progBar');
+        const progCont = document.getElementById('progCont');
+
+        const audio = document.getElementById('audioInput').files[0];
+        const cover = document.getElementById('coverInput').files[0];
+        
+        if (!audio || !cover) return alert("Please upload both the Master WAV and Artwork!");
+
+        btn.disabled = true;
+        progCont.style.display = "block";
+        progBar.style.width = "5%";
+        status.innerText = "Initiating secure upload...";
+
+        try {
+            const timestamp = Date.now();
+
+            // 1. Upload Audio
+            status.innerText = "Uploading Audio (Step 1/3)...";
+            const audioPath = `audio/${timestamp}_${audio.name.replace(/\s+/g, '_')}`;
+            const { error: audioErr } = await _supabase.storage.from('audio').upload(audioPath, audio);
+            if (audioErr) throw new Error("Audio Upload: " + audioErr.message);
+            progBar.style.width = "40%";
+
+            // 2. Upload Cover
+            status.innerText = "Uploading Artwork (Step 2/3)...";
+            const coverPath = `covers/${timestamp}_${cover.name.replace(/\s+/g, '_')}`;
+            const { error: coverErr } = await _supabase.storage.from('covers').upload(coverPath, cover);
+            if (coverErr) throw new Error("Artwork Upload: " + coverErr.message);
+            progBar.style.width = "80%";
+
+            // 3. Save to DB (Using the new Artist Name field)
+            status.innerText = "Finalizing Release (Step 3/3)...";
+            const { error: dbErr } = await _supabase.from('music_submissions').insert([{
+                song_title: document.getElementById('songTitle').value,
+                artist_name: document.getElementById('artistName').value, // Manual Input
+                genre: document.getElementById('songGenre').value,
+                audio_url: audioPath,
+                cover_url: coverPath,
+                user_id: Clerk.user.id
+            }]);
+
+            if (dbErr) throw new Error("Database Save: " + dbErr.message);
+
+            progBar.style.width = "100%";
+            status.innerHTML = `<span class="text-success fw-bold">✔ Release Successful! Check your Dashboard soon.</span>`;
+            
+            // Reset form after success
+            setTimeout(() => {
+                document.getElementById('submissionForm').reset();
+                progCont.style.display = "none";
+                btn.disabled = false;
+            }, 5000);
+
+        } catch (err) {
+            console.error("Critical Error:", err);
+            status.innerHTML = `<span class="text-danger">Submission Failed: ${err.message}</span>`;
+            btn.disabled = false;
+            // Don't hide the progress bar so the user can see where it failed
+            progBar.classList.add('bg-danger');
+        }
+    });
+</script>
+</body>
+</html>

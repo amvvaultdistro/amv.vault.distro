@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Join the Vault | AMV Vault</title>
+    <script
+      async
+      crossorigin="anonymous"
+      data-clerk-publishable-key="pk_test_Z29vZC1naXJhZmZlLTc5LmNsZXJrLmFjY291bnRzLmRldiQ"
+      src="https://good-giraffe-79.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+      type="text/javascript"
+    ></script>
+    <style>
+        :root { --gold: #D4AF37; }
+        body { background-color: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Inter', sans-serif; color: white; }
+        .plan-box { background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; width: 100%; max-width: 400px; text-align: center; }
+        select { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+        .gold-label { color: var(--gold); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="plan-box">
+        <span class="gold-label">Select Your Paid Plan</span>
+        <select id="plan-selector">
+            <option value="Basic">Artist Plan (Single)</option>
+            <option value="Label">Label Plan (5 Artists)</option>
+            <option value="LabelPro">Label Pro (10 Artists)</option>
+        </select>
+    </div>
+
+    <div id="sign-up"></div>
+
+    <script>
+        const planSelector = document.getElementById('plan-selector');
+
+        // Function to get the target URL based on the selected plan
+        function getTargetUrl(plan) {
+            if (plan === 'Label') return "label.html";
+            if (plan === 'LabelPro') return "label-pro.html";
+            return "dashboard.html"; // Default for Basic
+        }
+
+        window.addEventListener('load', async function () {
+            if (window.Clerk) {
+                await Clerk.load();
+                
+                // 1. Check URL for an existing plan (e.g. ?plan=Label)
+                const urlParams = new URLSearchParams(window.location.search);
+                const planFromUrl = urlParams.get('plan');
+                if (planFromUrl) {
+                    planSelector.value = planFromUrl;
+                    localStorage.setItem('pendingPlan', planFromUrl);
+                }
+
+                // 2. Initial Setup
+                let currentPlan = planSelector.value;
+                let targetUrl = getTargetUrl(currentPlan);
+
+                // 3. AUTO-REDIRECT: If already logged in, jump to the dashboard
+                if (Clerk.user) {
+                    window.location.href = targetUrl; 
+                    return;
+                }
+                
+                // 4. MOUNT SIGN-UP
+                const signUpDiv = document.getElementById("sign-up");
+                
+                const mountClerk = (url) => {
+                    Clerk.mountSignUp(signUpDiv, {
+                        afterSignUpUrl: url,
+                        afterSignInUrl: url,
+                        appearance: {
+                            variables: {
+                                colorPrimary: '#D4AF37',
+                                colorBackground: '#111',
+                                colorText: '#fff'
+                            }
+                        }
+                    });
+                };
+
+                // Load Clerk with the initial target
+                mountClerk(targetUrl);
+
+                // 5. UPDATE ON CHANGE: If they change the dropdown, update the redirect
+                planSelector.addEventListener('change', (e) => {
+                    const newPlan = e.target.value;
+                    localStorage.setItem('pendingPlan', newPlan);
+                    const newUrl = getTargetUrl(newPlan);
+                    
+                    // Remount Clerk so the internal redirect URL updates
+                    mountClerk(newUrl);
+                });
+
+            } else {
+                document.body.innerHTML = "<h2 style='color:white;'>Gate Error: Check Connection</h2>";
+            }
+        });
+    </script>
+</body>
+</html>

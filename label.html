@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Hub | AMV Vault</title>
+
+    <script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_Z29vZC1naXJhZmZlLTc5LmNsZXJrLmFjY291bnRzLmRldiQ" src="https://good-giraffe-79.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
+    
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: 'Inter', sans-serif; }
+        .header { background: #000; border-bottom: 1px solid #D4AF37; padding: 15px 0; position: sticky; top: 0; z-index: 1000; }
+        .header__logo strong { color: #D4AF37; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+        .header__menu ul { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; justify-content: flex-end; }
+        .header__menu li { margin-left: 20px; }
+        .header__menu li a { color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; }
+        
+        .hero-title { padding: 60px 0 20px; text-align: center; }
+        .label-name-display { color: #D4AF37; font-weight: 800; font-size: 3rem; text-transform: uppercase; margin-bottom: 10px; }
+
+        .artist-card { background: #161616; border: 1px solid #333; border-radius: 12px; padding: 30px; text-align: center; transition: 0.3s; margin-bottom: 20px; height: 100%; }
+        .artist-card h5 { margin-top: 15px; font-weight: 700; color: #fff; }
+        .artist-thumb { width: 70px; height: 70px; background: #222; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid #D4AF37; }
+        
+        .manage-btn { display: block; margin-top: 15px; padding: 10px; background: #D4AF37; color: #000; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 13px; border:none; width: 100%; }
+        .manage-btn:hover { background: #fff; color: #000; }
+        
+        .upgrade-box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #D4AF37; text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="header__logo"><strong>AMV VAULT</strong></div>
+            <div id="user-button"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero-title">
+            <h1 id="labelName" class="label-name-display">Loading Label...</h1>
+            <p class="text-muted">Standard 5-Artist Roster</p>
+        </div>
+
+        <div class="row g-4 justify-content-center" id="artistGrid">
+            </div>
+
+        <div class="upgrade-box">
+            <h3>Scale Your Empire</h3>
+            <p class="text-muted">Need more slots? Upgrade to the 10-Artist Pro Plan.</p>
+            <a href="label-pro.html" class="btn btn-warning font-weight-bold">UPGRADE TO PRO</a>
+        </div>
+    </div>
+
+    <script>
+        // 1. Clerk Protection
+        window.addEventListener('load', async function() {
+            await Clerk.load();
+            if (!Clerk.user) {
+                window.location.href = "login.html";
+            } else {
+                Clerk.mountUserButton(document.getElementById('user-button'));
+                initLabel();
+            }
+        });
+
+        // 2. One-Time Label Naming
+        function initLabel() {
+            let savedLabel = localStorage.getItem('amv_label_name');
+            if (!savedLabel) {
+                savedLabel = prompt("Enter your Label Name (This can only be set once):");
+                if (!savedLabel) savedLabel = "Unnamed Label";
+                localStorage.setItem('amv_label_name', savedLabel);
+            }
+            document.getElementById('labelName').innerText = savedLabel;
+            renderArtists(5);
+        }
+
+        // 3. One-Time Artist Naming
+        function setArtistName(slotId) {
+            let name = prompt("Enter Artist Name for this slot:");
+            if (name) {
+                localStorage.setItem(`artist_slot_${slotId}`, name);
+                location.reload(); // Refresh to lock it in
+            }
+        }
+
+        function renderArtists(count) {
+            const grid = document.getElementById('artistGrid');
+            for (let i = 1; i <= count; i++) {
+                let name = localStorage.getItem(`artist_slot_${i}`);
+                let isSetup = !!name;
+                
+                grid.innerHTML += `
+                    <div class="col-lg-4 col-md-6">
+                        <div class="artist-card ${isSetup ? '' : 'empty-slot'}">
+                            <div class="artist-thumb"><i class="fa ${isSetup ? 'fa-microphone' : 'fa-plus'}"></i></div>
+                            <h5>${name || 'Available Slot'}</h5>
+                            ${isSetup 
+                                ? `<a href="dashboard.html" class="manage-btn">Manage Artist</a>` 
+                                : `<button onclick="setArtistName(${i})" class="manage-btn" style="background:#333; color:#fff;">Assign Artist</button>`}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

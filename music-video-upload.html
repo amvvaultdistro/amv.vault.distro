@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload | AMV Vault Music Video</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+
+    <style>
+        :root { --amv-gold: #D4AF37; --amv-black: #080808; }
+        body { background: var(--amv-black); color: #fff; font-family: 'Inter', sans-serif; }
+        
+        .upload-container { max-width: 600px; margin: 80px auto; background: #111; padding: 40px; border-radius: 15px; border: 1px solid #222; }
+        .form-control { background: #000 !important; border: 1px solid #333 !important; color: #fff !important; padding: 12px; margin-bottom: 20px; }
+        
+        /* Premium Progress Bar */
+        .progress { height: 8px; background: #222; border-radius: 10px; margin: 20px 0; display: none; }
+        .progress-bar { background: var(--amv-gold); width: 0%; transition: 0.3s; }
+        
+        .upload-area { border: 2px dashed #333; padding: 30px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .upload-area:hover { border-color: var(--amv-gold); }
+        .btn-upload { background: var(--amv-gold); color: #000; font-weight: 800; width: 100%; padding: 15px; border: none; border-radius: 5px; text-transform: uppercase; }
+        .status-msg { font-size: 14px; margin-top: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="upload-container">
+        <h2 class="text-center mb-4" style="color: var(--amv-gold); font-weight: 800;">VEVO VIDEO UPLOAD</h2>
+        
+        <div id="uploadForm">
+            <label>Artist / Stage Name</label>
+            <input type="text" id="artistName" class="form-control" placeholder="e.g. Sjava">
+
+            <label>Video Title</label>
+            <input type="text" id="videoTitle" class="form-control" placeholder="e.g. Isoka (Official Music Video)">
+
+            <label>Select Video File (MP4, MOV)</label>
+            <div class="upload-area" onclick="document.getElementById('videoFile').click()">
+                <i class="fa fa-cloud-upload fa-2x mb-2" style="color: var(--amv-gold);"></i>
+                <p id="fileNameDisplay" class="m-0">Click to browse or drag & drop</p>
+                <input type="file" id="videoFile" hidden accept="video/*" onchange="updateFileName()">
+            </div>
+
+            <div class="progress" id="progressWrapper">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <p class="status-msg" id="statusMsg"></p>
+            <button class="btn-upload mt-3" onclick="startUpload()">Start Secure Upload</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. YOUR SUPABASE CONFIG
+    const SUPABASE_URL = 'https://evfywprduobqiwruvxfr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2Znl3cHJkdW9icWl3cnV2eGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzI0NjYsImV4cCI6MjA4ODQ0ODQ2Nn0.IiVO1pZsYcy7--JiqCV0WKIKyH3-BGwBcvbJa5P589k';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function updateFileName() {
+        const file = document.getElementById('videoFile').files[0];
+        if(file) document.getElementById('fileNameDisplay').innerText = file.name;
+    }
+
+    async function startUpload() {
+        const artist = document.getElementById('artistName').value;
+        const title = document.getElementById('videoTitle').value;
+        const videoFile = document.getElementById('videoFile').files[0];
+        const status = document.getElementById('statusMsg');
+        const progressWrapper = document.getElementById('progressWrapper');
+        const progressBar = document.getElementById('progressBar');
+
+        if (!artist || !title || !videoFile) {
+            alert("Please fill all fields and select a video.");
+            return;
+        }
+
+        // Generate clean file path: artist/timestamp-name.ext
+        const fileExt = videoFile.name.split('.').pop();
+        const path = `${artist.replace(/\s+/g, '_')}/${Date.now()}.${fileExt}`;
+
+        status.innerText = "Connecting to Vault Storage...";
+        progressWrapper.style.display = "block";
+
+        // 2. UPLOAD TO STORAGE
+        const { data, error } = await supabase.storage
+            .from('vault-uploads')
+            .upload(path, videoFile, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (error) {
+            status.innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
+            return;
+        }
+
+        // 3. GET PUBLIC URL
+        const { data: urlData } = supabase.storage.from('vault-uploads').getPublicUrl(path);
+        const finalUrl = urlData.publicUrl;
+
+        status.innerText = "Finalizing Submission...";
+
+        // 4. SAVE TO DATABASE TABLE
+        const { dbError } = await supabase
+            .from('video_submissions')
+            .insert([{ 
+                artist_name: artist, 
+                video_title: title, 
+                video_url: finalUrl 
+            }]);
+
+        if (dbError) {
+            status.innerText = "Video uploaded, but database entry failed. Contact Support.";
+        } else {
+            status.innerHTML = `<span style="color:var(--amv-gold)">Success! Video received by AMV Vault.</span>`;
+            progressBar.style.width = "100%";
+            setTimeout(() => { window.location.href = "contact.html"; }, 2000);
+        }
+    }
+</script>
+
+</body>
+</html>
