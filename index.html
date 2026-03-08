@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AMV Vault | Global Music Distribution</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
@@ -13,23 +13,29 @@
 
     <style>
         :root { --gold: #D4AF37; --black: #000; --card: #0a0a0a; }
-        body { background: var(--black); color: hsl(41, 100%, 47%); font-family: 'Inter', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
+        body { background: var(--black); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
         
         /* Header */
-        .header { background: rgba(0,0,0,0.95); border-bottom: 1px solid hsl(41, 100%, 47%); padding: 15px 0; position: fixed; width: 100%; z-index: 1000; }
+        .header { background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--gold); padding: 15px 0; position: fixed; width: 100%; z-index: 1000; }
         .gold-text { color: var(--gold); font-weight: 900; }
         
         /* Hero Section */
-        .hero-section { padding: 160px 0 80px; background: radial-gradient(circle at top right, #1a1500 0%, #000 70%); }
-        .hero-video { width: 100%; border-radius: 20px; border: 1px solid #222; box-shadow: 0 20px 50px rgba(0,0,0,0.9); }
+        .hero-section { padding: 120px 0 60px; background: radial-gradient(circle at top right, #1a1500 0%, #000 70%); }
+        .hero-video { width: 100%; border-radius: 20px; border: 1px solid #222; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2); }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 38px !important; }
+            .hero-section { padding-top: 100px; text-align: center; }
+        }
 
         /* Music Player UI */
         .vault-player {
             background: rgba(20, 20, 20, 0.8);
             border: 1px solid #333;
             border-radius: 15px;
-            padding: 20px;
-            margin-top: 30px;
+            padding: 15px;
+            margin-top: 25px;
             backdrop-filter: blur(10px);
         }
         .track-item {
@@ -41,22 +47,21 @@
             transition: 0.3s;
             margin-bottom: 8px;
             border: 1px solid transparent;
+            background: #111;
         }
         .track-item:hover, .track-item.active { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); }
         .play-icon-sm { color: var(--gold); margin-right: 15px; font-size: 20px; }
-        .track-name { font-size: 13px; font-weight: 700; letter-spacing: 1px; flex-grow: 1; text-transform: uppercase; }
+        .track-name { font-size: 11px; font-weight: 700; letter-spacing: 1px; flex-grow: 1; text-transform: uppercase; color: #fff; text-align: left; }
 
         /* Pricing UI */
-        .pricing-card { background: var(--card); border: 1px solid #222; padding: 40px 20px; border-radius: 20px; transition: 0.3s; text-align: center; height: 100%; display: flex; flex-direction: column; }
-        .pricing-card:hover { border-color: var(--gold); transform: translateY(-10px); }
-        .price-tag { font-size: 32px; font-weight: 900; margin: 15px 0; color: var(--gold); }
+        .pricing-card { background: var(--card); border: 1px solid #222; padding: 30px 20px; border-radius: 20px; transition: 0.3s; text-align: center; height: 100%; display: flex; flex-direction: column; }
+        .pricing-card:hover { border-color: var(--gold); transform: translateY(-5px); }
+        .price-tag { font-size: 28px; font-weight: 900; margin: 15px 0; color: var(--gold); }
         
-        .btn-paystack { background: var(--gold); color: #000; font-weight: 900; padding: 16px; border-radius: 8px; border: none; width: 100%; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
-        .btn-paystack:hover { background: #fff; transform: scale(1.05); }
+        .btn-paystack { background: var(--gold); color: #000; font-weight: 900; padding: 14px; border-radius: 8px; border: none; width: 100%; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .btn-paystack:hover { background: #fff; }
 
-        /* Payment Methods Trust Bar */
-        .payment-methods { background: #050505; padding: 30px 0; border-top: 1px solid #111; }
-        .payment-pill { background: #111; padding: 8px 18px; border-radius: 50px; border: 1px solid #222; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; margin: 5px; }
+        .payment-pill { background: #111; padding: 6px 14px; border-radius: 50px; border: 1px solid #222; font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; margin: 4px; }
     </style>
 </head>
 <body>
@@ -64,7 +69,7 @@
     <header class="header">
         <div class="container d-flex justify-content-between align-items-center">
             <h4 class="gold-text m-0" style="letter-spacing: 2px;">AMV VAULT</h4>
-            <a href="login.html" class="text-white fw-bold small text-decoration-none border px-3 py-1 rounded">MEMBER LOGIN</a>
+            <a href="login.html" class="text-white fw-bold small text-decoration-none border px-3 py-1 rounded">LOGIN</a>
         </div>
     </header>
 
@@ -73,30 +78,26 @@
             <div class="row align-items-center">
                 <div class="col-lg-6">
                     <h1 style="font-size: 55px; font-weight: 900; line-height: 1;">PUSH YOUR SOUND <br><span class="gold-text">WORLDWIDE.</span></h1>
-                    <p class="text-muted mt-3">The South African standard for high-fidelity music distribution. Select a track below to hear the AMV Vault quality.</p>
+                    <p class="text-muted mt-3">The South African standard for music distribution. Direct delivery to Spotify, Apple Music, and VEVO.</p>
                     
                     <div class="vault-player">
                         <div class="track-item active" onclick="playTrack('music/1.mp3', this)">
                             <i class="fa fa-play-circle play-icon-sm"></i>
-                            <div class="track-name">01. KILLER VIBE - AMAPIANO MASTER</div>
+                            <div class="track-name">01. AMAPIANO MASTER - AMV TEST</div>
                         </div>
                         <div class="track-item" onclick="playTrack('music/2.mp3', this)">
                             <i class="fa fa-play-circle play-icon-sm"></i>
                             <div class="track-name">02. AFRO-TECH SOUL - CLUB MIX</div>
                         </div>
-                        <div class="track-item" onclick="playTrack('music/3.mp3', this)">
-                            <i class="fa fa-play-circle play-icon-sm"></i>
-                            <div class="track-name">03. HIP HOP/RNB - RADIO MASTER</div>
-                        </div>
                         <audio id="mainAudio" src="music/1.mp3"></audio>
                     </div>
 
                     <div class="mt-4">
-                        <a href="#pricing" class="btn btn-warning fw-bold px-5 py-3 rounded-pill" style="color:#000;">VIEW ACCESS PLANS</a>
+                        <a href="#pricing" class="btn btn-warning fw-bold px-5 py-3 rounded-pill" style="color:#000; background: var(--gold); border:none;">GET STARTED</a>
                     </div>
                 </div>
                 <div class="col-lg-6 mt-5 mt-lg-0">
-                    <img src="img/hero-video..gif" class="hero-video" alt="Vault Animation">
+                    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ4Znd4Znd4Znd4Znd4Znd4Znd4Znd4Znd4Znd4Znd4Znd4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxxpfu0Uto4/giphy.gif" class="hero-video" alt="Vault Animation">
                 </div>
             </div>
         </div>
@@ -104,97 +105,79 @@
 
     <section class="payment-methods text-center">
         <div class="container d-flex flex-wrap justify-content-center">
-            <div class="payment-pill">Instant EFT (All SA Banks)</div>
+            <div class="payment-pill">Instant EFT</div>
             <div class="payment-pill">Capitec Pay</div>
-            <div class="payment-pill">Debit & Credit Cards</div>
-            <div class="payment-pill">Apple Pay / Google Pay</div>
+            <div class="payment-pill">Visa / Mastercard</div>
+            <div class="payment-pill">Apple Pay</div>
         </div>
     </section>
 
     <section id="pricing" class="py-5">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-900">SELECT YOUR <span class="gold-text">PLAN</span></h2>
-                <p class="text-muted">Prices in ZAR. High-fidelity distribution guaranteed.</p>
+                <h2 class="fw-900">CHOOSE YOUR <span class="gold-text">ACCESS</span></h2>
+                <p class="text-muted small">All plans include 100% Royalties & Monthly Payouts.</p>
             </div>
             
             <div class="row g-4">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="pricing-card">
                         <h5 class="fw-bold">ARTIST</h5>
                         <div class="price-tag">R 413,46</div>
-                        <p class="small text-muted mb-4">Single Artist Management</p>
-                        <button class="btn-paystack" onclick="payWithPaystack(413.46, 'Artist')">Pay with Paystack</button>
+                        <p class="small text-muted mb-4">Unlimited Single Artist Distribution</p>
+                        <button class="btn-paystack" onclick="payWithPaystack(413.46, 'Artist')">Get Artist Access</button>
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="pricing-card" style="border: 2px solid var(--gold);">
+                <div class="col-md-4">
+                    <div class="pricing-card" style="border: 2px solid var(--gold); background: #050505;">
                         <div class="small fw-bold text-warning mb-2">MOST POPULAR</div>
                         <h5 class="fw-bold">LABEL</h5>
                         <div class="price-tag">R 909,82</div>
-                        <p class="small text-muted mb-4">5 Artist Accounts</p>
-                        <button class="btn-paystack" onclick="payWithPaystack(909.82, 'Label')">Pay with Paystack</button>
+                        <p class="small text-muted mb-4">Up to 5 Artists Management</p>
+                        <button class="btn-paystack" onclick="payWithPaystack(909.82, 'Label')">Get Label Access</button>
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="pricing-card">
-                        <h5 class="fw-bold">PRO HUB</h5>
-                        <div class="price-tag">R 1819,64</div>
-                        <p class="small text-muted mb-4">10 Artist Accounts</p>
-                        <button class="btn-paystack" onclick="payWithPaystack(1819.64, 'Pro Hub')">Pay with Paystack</button>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="pricing-card">
                         <h5 class="fw-bold">VIDEO</h5>
                         <div class="price-tag">R 744,37</div>
-                        <p class="small text-muted mb-4">Official Vevo Delivery</p>
-                        <button class="btn-paystack" onclick="payWithPaystack(744.37, 'Video')">Pay with Paystack</button>
+                        <p class="small text-muted mb-4">Official VEVO Channel & Delivery</p>
+                        <button class="btn-paystack" onclick="payWithPaystack(744.37, 'Video')">Get Video Access</button>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-5 text-center" style="border-top: 1px solid hsl(41, 100%, 47%);">
+    <footer class="py-5 text-center" style="border-top: 1px solid #222;">
         <p class="text-muted small">&copy; 2026 AMV VAULT | Durban, South Africa</p>
     </footer>
 
     <script>
-        // --- 1. MUSIC PLAYER LOGIC ---
         const audio = document.getElementById('mainAudio');
         
         function playTrack(src, element) {
-            // UI Update
             document.querySelectorAll('.track-item').forEach(i => i.classList.remove('active'));
             element.classList.add('active');
-            
-            // Audio Switch
             audio.src = src;
-            audio.play().catch(err => {
-                console.log("User must click play manually the first time.");
-            });
+            audio.play().catch(e => console.log("Click to play"));
         }
 
-        // --- 2. PAYSTACK PAYMENT LOGIC ---
         function payWithPaystack(amount, planName) {
             let handler = PaystackPop.setup({
-                key: 'pk_test_9afd0a9571c4cef89488f9e007669fd9189535b4', // <--- REPLACE THIS WITH YOUR LIVE KEY
+                key: 'pk_test_9afd0a9571c4cef89488f9e007669fd9189535b4', // <--- USE YOUR LIVE KEY WHEN READY
                 email: 'amvvaultdistro@gmail.com',
-                amount: Math.round(amount * 100), // Rands to Cents
+                amount: Math.round(amount * 100), 
                 currency: 'ZAR',
-                metadata: {
-                    plan: planName
-                },
+                metadata: { plan: planName },
                 callback: function(response) {
-                    // On Success: Redirect to Signup with proof of payment
-                    window.location.href = "signup.html?ref=" + response.reference + "&plan=" + planName;
+                    // This takes the artist to the Signup page AFTER they pay
+                    window.location.href = "signup.html?paid=true&ref=" + response.reference + "&plan=" + planName;
                 },
                 onClose: function() {
-                    alert('Transaction incomplete. Your Vault access is still pending.');
+                    alert('Vault access requires successful payment.');
                 }
             });
             handler.openIframe();
