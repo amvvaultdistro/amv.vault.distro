@@ -13,129 +13,151 @@
     <script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_Z29vZC1naXJhZmZlLTc5LmNsZXJrLmFjY291bnRzLmRldiQ" src="https://good-giraffe-79.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
 
     <style>
-        :root { --gold: #D4AF37; --dark: #000000; --card-bg: #0a0a0a; }
-        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        :root { 
+            --gold: #D4AF37; 
+            --bg: #000000; 
+            --card: #0a0a0a; 
+            --text: #ffffff;
+            --border: #222;
+        }
+
+        /* Light Theme Variable Overrides */
+        body.light-theme {
+            --bg: #f4f4f4;
+            --card: #ffffff;
+            --text: #000000;
+            --border: #ddd;
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.3s; }
         
-        .wrapper { display: flex; }
-        .sidebar { min-width: 260px; background: var(--dark); min-height: 100vh; border-right: 1px solid #222; position: fixed; padding: 30px 20px; z-index: 100; transition: 0.3s; }
-        .content { margin-left: 260px; width: 100%; padding: 40px; transition: 0.3s; }
+        .sidebar { min-width: 260px; background: var(--bg); min-height: 100vh; border-right: 1px solid var(--border); position: fixed; padding: 30px 20px; z-index: 100; }
+        .content { margin-left: 260px; width: 100%; padding: 40px; }
+        
+        .nav-link { color: #888; padding: 12px; border-radius: 10px; margin-bottom: 5px; cursor: pointer; text-decoration: none; display: block; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background: var(--card); color: var(--gold); border: 1px solid var(--border); }
+        
+        .portal-card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .gold-text { color: var(--gold); font-weight: 800; }
+
+        .profile-btn { border-radius: 50px; border: 1px solid var(--gold); padding: 5px 15px; font-size: 12px; color: var(--gold); background: transparent; transition: 0.3s; }
+        .profile-btn:hover { background: var(--gold); color: #000; }
+
+        .form-control { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; }
+        .btn-gold { background: var(--gold); color: #000; font-weight: 900; border: none; padding: 15px; border-radius: 8px; width: 100%; }
+
+        /* Future Features Styling */
+        .ai-chat-box { height: 300px; background: #050505; border-radius: 10px; padding: 15px; overflow-y: auto; border: 1px solid var(--gold); }
         
         @media (max-width: 992px) {
             .sidebar { margin-left: -260px; }
+            .content { margin-left: 0; padding-top: 80px; }
             .sidebar.active { margin-left: 0; }
-            .content { margin-left: 0; padding: 20px; padding-top: 80px; }
-            .mobile-nav { display: block !important; position: fixed; top: 0; width: 100%; background: #000; padding: 15px; border-bottom: 1px solid #222; z-index: 1001; }
         }
 
-        .nav-link { color: #888; padding: 15px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; text-decoration: none; display: block; transition: 0.3s; border: 1px solid transparent; }
-        .nav-link:hover, .nav-link.active { background: #111; color: var(--gold); border-color: #222; }
-        
-        .portal-card { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; padding: 25px; margin-bottom: 30px; }
-        .gold-text { color: var(--gold); font-weight: 800; }
-        
-        .form-control { background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
-        .form-control:focus { background: #151515; color: #fff; border-color: var(--gold); box-shadow: none; }
-        
-        .upload-box { border: 2px dashed #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .upload-box:hover { border-color: var(--gold); background: #050505; }
-        
-        .btn-gold { background: var(--gold); color: #000; font-weight: 900; border: none; padding: 15px; border-radius: 8px; width: 100%; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; cursor: pointer;}
-        .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .progress { height: 12px; background: #111; border-radius: 10px; display: none; margin-top: 20px; }
-        .progress-bar { background: var(--gold); transition: width 0.4s ease; }
-
         .tab-section { display: none; }
-        .tab-section.active { display: block; animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-section.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body>
+<body class="dark-theme">
 
-<div class="mobile-nav d-none">
-    <div class="d-flex justify-content-between align-items-center">
-        <h5 class="gold-text m-0">AMV VAULT</h5>
-        <button class="btn btn-outline-warning btn-sm" onclick="document.querySelector('.sidebar').classList.toggle('active')">
-            <i class="fa fa-bars"></i>
-        </button>
-    </div>
+<div class="mobile-nav d-none p-3 border-bottom d-flex justify-content-between align-items-center bg-black fixed-top">
+    <h5 class="gold-text m-0">AMV VAULT</h5>
+    <button class="btn btn-outline-warning" onclick="document.querySelector('.sidebar').classList.toggle('active')"><i class="fa fa-bars"></i></button>
 </div>
 
 <div class="wrapper" id="main-wrapper" style="display: none;">
     <nav class="sidebar">
-        <h3 class="gold-text mb-5 text-center" style="letter-spacing: 2px;">AMV VAULT</h3>
-        <a class="nav-link active" onclick="switchTab(event, 'dash-tab')"><i class="fa fa-th-large"></i> Dashboard</a>
-        <a class="nav-link" onclick="switchTab(event, 'upload-tab')"><i class="fa fa-cloud-upload"></i> Distribute Audio</a>
-        <a class="nav-link" onclick="switchTab(event, 'wallet-tab')"><i class="fa fa-bank"></i> Payouts</a>
-        <hr style="border-color: #222;">
+        <div class="text-center mb-4">
+            <div id="user-avatar-container" class="mb-2"></div>
+            <button class="profile-btn" onclick="Clerk.openUserProfile()">Personalize Profile</button>
+        </div>
+        <hr style="border-color: var(--border);">
+        <a class="nav-link active" onclick="switchTab(event, 'dash-tab')"><i class="fa fa-th-large"></i> <span class="lang-en">Dashboard</span><span class="lang-zu d-none">Ideshibhodi</span></a>
+        <a class="nav-link" onclick="switchTab(event, 'upload-tab')"><i class="fa fa-music"></i> <span class="lang-en">Distribute</span><span class="lang-zu d-none">Sabalalisa</span></a>
+        <a class="nav-link" onclick="switchTab(event, 'stats-tab')"><i class="fa fa-line-chart"></i> <span class="lang-en">Analytics</span><span class="lang-zu d-none">Izibalo</span></a>
+        <a class="nav-link" onclick="switchTab(event, 'splits-tab')"><i class="fa fa-users"></i> <span class="lang-en">Split Sheets</span><span class="lang-zu d-none">Amaphepha Okuhlukanisa</span></a>
+        <a class="nav-link" onclick="switchTab(event, 'ai-tab')"><i class="fa fa-android"></i> <span class="lang-en">AI Vault Chat</span><span class="lang-zu d-none">Ingxoxo ye-AI</span></a>
+        <a class="nav-link" onclick="switchTab(event, 'settings-tab')"><i class="fa fa-cog"></i> <span class="lang-en">Settings</span><span class="lang-zu d-none">Izilungiselelo</span></a>
+        <hr style="border-color: var(--border);">
         <a href="#" id="logout-link" class="nav-link text-danger"><i class="fa fa-sign-out"></i> Logout</a>
     </nav>
 
     <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-900 m-0"><span class="lang-en">Molo</span><span class="lang-zu d-none">Sawubona</span>, <span id="artist-name" class="gold-text">Artist</span></h1>
+                <p class="text-muted small">AMV Vault Premium Member</p>
+            </div>
+        </div>
+
         <div id="dash-tab" class="tab-section active">
-            <h1 class="fw-900">Molo, <span class="gold-text" id="artist-display">Artist</span></h1>
-            <p class="text-muted">Your Global Distribution Hub.</p>
-            <div class="row mt-4">
-                <div class="col-6 col-md-4"><div class="portal-card"><h6>Revenue</h6><h2 class="gold-text">R 0.00</h2></div></div>
-                <div class="col-6 col-md-4"><div class="portal-card"><h6>Streams</h6><h2 class="gold-text">0</h2></div></div>
-                <div class="col-12 col-md-4"><div class="portal-card"><h6>Status</h6><h2 class="text-success small fw-bold">Active Account</h2></div></div>
+            <div class="row">
+                <div class="col-md-4"><div class="portal-card"><h6>Total Revenue</h6><h2 class="gold-text">R 0.00</h2></div></div>
+                <div class="col-md-4"><div class="portal-card"><h6>Total Streams</h6><h2 class="gold-text">0</h2></div></div>
+                <div class="col-md-4"><div class="portal-card"><h6>Market Value</h6><h2 class="text-success small fw-bold">+12% Trending</h2></div></div>
             </div>
         </div>
 
         <div id="upload-tab" class="tab-section">
-            <h1 class="fw-900 mb-4">New <span class="gold-text">Release</span></h1>
-            <form id="submissionForm">
-                <div class="portal-card">
-                    <h5 class="gold-text mb-3">Release Info</h5>
+            <div class="portal-card">
+                <h4 class="gold-text">New Distribution</h4>
+                <form id="submissionForm">
+                    <input type="text" id="songTitle" class="form-control mb-3" placeholder="Song Title" required>
+                    <input type="text" id="isrcCode" class="form-control mb-3" placeholder="Existing ISRC (Optional)">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="small fw-bold text-muted">PRIMARY ARTIST</label>
-                            <input type="text" id="artistName" class="form-control" placeholder="Artist Name" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="small fw-bold text-muted">SONG TITLE</label>
-                            <input type="text" id="songTitle" class="form-control" placeholder="Song Title" required>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="small fw-bold text-muted text-warning">EXISTING ISRC (MIGRATION ONLY)</label>
-                            <input type="text" id="isrcCode" class="form-control" placeholder="Leave blank for new releases">
-                            <small class="text-muted">Enter old ISRC to keep your stream counts from previous distributors.</small>
-                        </div>
+                        <div class="col-6"><button type="button" class="btn btn-outline-secondary w-100" onclick="document.getElementById('audioInput').click()">Upload WAV</button></div>
+                        <div class="col-6"><button type="button" class="btn btn-outline-secondary w-100" onclick="document.getElementById('coverInput').click()">Upload Art</button></div>
                     </div>
-                    
-                    <div class="row mt-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="upload-box" onclick="document.getElementById('audioInput').click()">
-                                <i class="fa fa-file-audio-o fa-2x gold-text mb-2"></i><br>
-                                <span id="audioName" class="small">Upload Master WAV</span>
-                                <input type="file" id="audioInput" hidden accept=".wav" onchange="previewFile('audioInput', 'audioName')">
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="upload-box" onclick="document.getElementById('coverInput').click()">
-                                <i class="fa fa-image fa-2x gold-text mb-2"></i><br>
-                                <span id="coverName" class="small">Artwork (3000x3000px)</span>
-                                <input type="file" id="coverInput" hidden accept="image/*" onchange="previewFile('coverInput', 'coverName')">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="progress" id="progCont">
-                    <div id="progBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                </div>
-                <p id="statusTxt" class="text-center mt-2 small"></p>
-                <button type="submit" id="submitBtn" class="btn-gold mt-3">Push to Stores</button>
-            </form>
+                    <input type="file" id="audioInput" hidden accept=".wav">
+                    <input type="file" id="coverInput" hidden accept="image/*">
+                    <button type="submit" class="btn-gold mt-4">Release to the World</button>
+                </form>
+            </div>
         </div>
 
-        <div id="wallet-tab" class="tab-section">
-            <h1 class="fw-900">Financial <span class="gold-text">Vault</span></h1>
-            <div class="portal-card text-center py-5">
-                <i class="fa fa-lock fa-3x mb-3 text-muted"></i>
-                <h5>Current Balance: <span class="gold-text">R 0.00</span></h5>
-                <p class="text-muted small">Local Payouts (Instant EFT/Capitec) process on the 15th of every month.</p>
-                <button class="btn btn-outline-warning btn-sm mt-3" disabled>Request Payout</button>
+        <div id="splits-tab" class="tab-section">
+            <div class="portal-card">
+                <h4 class="gold-text">Automated Split Sheets</h4>
+                <p class="small text-muted">Legalize your collaborations. Add your producers & features here.</p>
+                <div id="split-list" class="mb-3">
+                    <div class="d-flex gap-2 mb-2">
+                        <input type="text" class="form-control" placeholder="Collaborator Email">
+                        <input type="number" class="form-control w-25" placeholder="%">
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-outline-warning">+ Add Collaborator</button>
+            </div>
+        </div>
+
+        <div id="ai-tab" class="tab-section">
+            <div class="portal-card">
+                <h4 class="gold-text">AI Career Consultant</h4>
+                <div class="ai-chat-box mb-3 text-muted small">
+                    AI: "Molo! I am your AMV Vault AI. Ask me how to promote your next Amapiano hit or how to register with SAMRO."
+                </div>
+                <input type="text" class="form-control" placeholder="Ask AI anything...">
+            </div>
+        </div>
+
+        <div id="settings-tab" class="tab-section">
+            <div class="portal-card">
+                <h5 class="mb-4">System Preferences</h5>
+                <label class="d-block mb-3">
+                    <span>Theme Mode:</span>
+                    <select class="form-control mt-2" onchange="toggleTheme(this.value)">
+                        <option value="dark">Midnight Black (Default)</option>
+                        <option value="light">Studio White</option>
+                    </select>
+                </label>
+                <label class="d-block mb-3">
+                    <span>Working Language:</span>
+                    <select class="form-control mt-2" onchange="toggleLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="zu">isiZulu</option>
+                    </select>
+                </label>
             </div>
         </div>
     </div>
@@ -143,97 +165,44 @@
 
 <script>
     const SB_URL = 'https://evfywprduobqiwruvxfr.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2Znl3cHJkdW9icWl3cnV2eGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzI0NjYsImV4cCI6MjA4ODQ0ODQ2Nn0.IiVO1pZsYcy7--JiqCV0WKIKyH3-BGwBcvbJa5P589k'; 
+    const SB_KEY = 'YOUR_KEY'; 
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
     window.addEventListener('load', async () => {
         await Clerk.load();
-        if (!Clerk.user) {
-            window.location.href = "login.html";
-            return;
-        }
-        document.getElementById('artist-display').innerText = Clerk.user.firstName || "Artist";
-        document.getElementById('artistName').value = Clerk.user.firstName || "";
+        if (!Clerk.user) { window.location.href = "login.html"; return; }
+        
+        document.getElementById('artist-name').innerText = Clerk.user.firstName || "Artist";
         document.getElementById('main-wrapper').style.display = 'flex';
+        
+        // Mount User Button in Sidebar
+        const userButtonDiv = document.getElementById('user-avatar-container');
+        Clerk.mountUserButton(userButtonDiv);
     });
 
     function switchTab(e, tabId) {
         document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
-        e.currentTarget.classList.add('active');
-        if(window.innerWidth < 992) document.querySelector('.sidebar').classList.remove('active');
+        if(e) e.currentTarget.classList.add('active');
     }
 
-    function previewFile(inputId, displayId) {
-        const file = document.getElementById(inputId).files[0];
-        if (file) {
-            document.getElementById(displayId).innerText = file.name;
-            document.getElementById(displayId).style.color = "#D4AF37";
+    function toggleTheme(theme) {
+        if(theme === 'light') document.body.classList.add('light-theme');
+        else document.body.classList.remove('light-theme');
+    }
+
+    function toggleLanguage(lang) {
+        if(lang === 'zu') {
+            document.querySelectorAll('.lang-en').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.lang-zu').forEach(el => el.classList.remove('d-none'));
+        } else {
+            document.querySelectorAll('.lang-zu').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.lang-en').forEach(el => el.classList.remove('d-none'));
         }
     }
 
-    document.getElementById('submissionForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        const status = document.getElementById('statusTxt');
-        const progBar = document.getElementById('progBar');
-        const progCont = document.getElementById('progCont');
-
-        const audio = document.getElementById('audioInput').files[0];
-        const cover = document.getElementById('coverInput').files[0];
-        if (!audio || !cover) return alert("Please upload both your Master WAV and Artwork!");
-
-        btn.disabled = true;
-        progCont.style.display = "block";
-        status.innerText = "Vaulting your music...";
-
-        try {
-            const timestamp = Date.now();
-
-            // 1. Audio Upload
-            status.innerText = "Step 1/3: Syncing Master Audio...";
-            const audioPath = `audio/${timestamp}_${audio.name.replace(/\s+/g, '_')}`;
-            const { error: aErr } = await _supabase.storage.from('audio').upload(audioPath, audio);
-            if(aErr) throw aErr;
-            progBar.style.width = "35%";
-
-            // 2. Cover Upload
-            status.innerText = "Step 2/3: Securing Artwork...";
-            const coverPath = `covers/${timestamp}_${cover.name.replace(/\s+/g, '_')}`;
-            const { error: cErr } = await _supabase.storage.from('covers').upload(coverPath, cover);
-            if(cErr) throw cErr;
-            progBar.style.width = "70%";
-
-            // 3. Database Entry
-            status.innerText = "Step 3/3: Finalizing Distribution Metadata...";
-            const { error: dbErr } = await _supabase.from('music_submissions').insert([{
-                song_title: document.getElementById('songTitle').value,
-                artist_name: document.getElementById('artistName').value,
-                isrc: document.getElementById('isrcCode').value || null, // Optional ISRC for friends
-                audio_url: audioPath,
-                cover_url: coverPath,
-                user_id: Clerk.user.id // This is a TEXT string from Clerk
-            }]);
-
-            if (dbErr) throw dbErr;
-
-            progBar.style.width = "100%";
-            status.innerHTML = `<span style="color: #28a745; font-weight: bold;">✔ Upload Successful! We are reviewing your release.</span>`;
-            
-            setTimeout(() => {
-                location.reload();
-            }, 4000);
-
-        } catch (err) {
-            console.error(err);
-            status.innerHTML = `<span style="color: #ff4d4d;">Critical Error: ${err.message}</span>`;
-            btn.disabled = false;
-        }
-    });
-
-    document.getElementById('logout-link').addEventListener('click', async (e) => {
-        e.preventDefault();
+    document.getElementById('logout-link').addEventListener('click', async () => {
         await Clerk.signOut();
         window.location.href = "index.html";
     });
